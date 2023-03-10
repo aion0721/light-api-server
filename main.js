@@ -7,22 +7,20 @@ const server = http.createServer();
 const config = JSON.parse(fs.readFileSync("./config.json", "utf8"));
 
 server.on("request", function (req, res) {
-  switch (req.url) {
-    case "/":
-      fs.readFile(
-        __dirname + "/static/index.html",
-        "utf8",
-        function (err, data) {
-          res.writeHead(200, { "Content-Type": "text/html" });
-          res.write(data);
-          res.end();
-        }
-      );
-      break;
-    default:
-      res.writeHead(404, { "Content-Type": "text/html" });
-      res.write("<h1>NOT FOUND...</h1>");
+  if (req.url === "/") {
+    fs.readFile(__dirname + "/static/index.html", "utf8", function (err, data) {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.write(data);
       res.end();
+    });
+  } else if (config.resources.includes(req.url.replace("/", ""))) {
+    res.writeHead(200, { "Content-Type": "text/html" });
+    res.write("ok");
+    res.end();
+  } else {
+    res.writeHead(404, { "Content-Type": "text/html" });
+    res.write("<h1>NOT FOUND...</h1>");
+    res.end();
   }
 });
 
