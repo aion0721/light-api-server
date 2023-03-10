@@ -19,6 +19,10 @@ server.on("request", function (req, res) {
         }
       );
       break;
+    default:
+      res.writeHead(404, { "Content-Type": "text/html" });
+      res.write("<h1>NOT FOUND...</h1>");
+      res.end();
   }
 });
 
