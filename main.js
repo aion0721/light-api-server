@@ -2,6 +2,7 @@
 const http = require("http");
 const url = require("url");
 const fs = require("fs");
+const init = require("./lib/init.js");
 
 // Load Config
 const config = JSON.parse(fs.readFileSync("./config.json", "utf8"));
@@ -11,24 +12,7 @@ const server = http.createServer();
 const dataDir = "./data";
 
 // Initial
-// Check data directory
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, (err) => {
-    throw err;
-  });
-  console.log("=== Initial === Create data directory.");
-}
-
-// Check resources files
-for (const resource of config.resources) {
-  const resourceFilePath = `${dataDir}/${resource}`;
-  if (!fs.existsSync(resourceFilePath)) {
-    fs.writeFileSync(resourceFilePath, "{}", (err) => {
-      throw err;
-    });
-    console.log(`=== Initial === Create resouce file(resouce: ${resource})`);
-  }
-}
+init(dataDir, config.resources);
 
 server.on("request", function (req, res) {
   const urlParse = url.parse(req.url, true);
