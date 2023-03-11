@@ -20,6 +20,7 @@ server.on("request", function (req, res) {
   const reqResource = urlParse.pathname.replace("/", "");
   const reqMethod = req.method;
   const reqQuery = urlParse.query;
+  const reqQueryLength = Object.keys(reqQuery).length;
 
   // Static Index
   if (urlParse.pathname === "/") {
@@ -41,17 +42,32 @@ server.on("request", function (req, res) {
         "utf8",
         function (err, data) {
           try {
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.write(data);
-            res.end();
+            // Check query
+            if (reqQueryLength === 0) {
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.write(data);
+              res.end();
+            } else if (reqQueryLength === 1) {
+              const searchData = JSON.parse(data).filter((item, index) => {
+                if (item.id == reqQuery.id) return true;
+              });
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.write(JSON.stringify(searchData));
+              res.end();
+            } else {
+              res.writeHead(404, { "Content-Type": "text/html" });
+              res.write("<h1>INVALID QUERY...</h1>");
+              res.end();
+            }
           } catch {
-            res.writeHead(500, { "Content-Type": "application/json" });
+            res.writeHead(500, { "Content-Type": "text/html" });
             res.write("err has occured.");
             res.end();
             throw err;
           }
         }
       );
+
       return;
     }
     // POST
