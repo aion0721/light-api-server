@@ -35,13 +35,13 @@ server.on("request", function (req, res) {
     });
     // Check Exist Resource
   } else if (config.resources.includes(reqResource)) {
-    // GET
-    if (reqMethod == "GET") {
-      fs.readFile(
-        __dirname + "/" + dataDir + "/" + reqResource,
-        "utf8",
-        function (err, data) {
-          try {
+    fs.readFile(
+      __dirname + "/" + dataDir + "/" + reqResource,
+      "utf8",
+      function (err, data) {
+        try {
+          // GET
+          if (reqMethod == "GET") {
             // Check query
             if (reqQueryLength === 0) {
               res.writeHead(200, { "Content-Type": "application/json" });
@@ -60,24 +60,41 @@ server.on("request", function (req, res) {
               res.write("<h1>INVALID QUERY...</h1>");
               res.end();
             }
-          } catch {
-            res.writeHead(500, { "Content-Type": "text/html" });
-            res.write("err has occured.");
-            res.end();
-            throw err;
+            return;
           }
+
+          // POST
+          if (reqMethod == "POST") {
+            let stream = "";
+            req.on("data", (chunk) => {
+              stream += chunk;
+            });
+            req.on("end", () => {
+              const addedData = [...JSON.parse(data), JSON.parse(stream)];
+              fs.writeFile(
+                __dirname + "/" + dataDir + "/" + reqResource,
+                JSON.stringify(addedData),
+                (err) => {
+                  if (err) throw err;
+                  res.writeHead(200, { "Content-Type": "text/html" });
+                  res.write("<h1>OK Registed<h1>");
+                  res.end();
+                }
+              );
+            });
+          }
+
+          // DELETE
+          if (reqMethod == "DELETE") {
+          }
+        } catch {
+          res.writeHead(500, { "Content-Type": "text/html" });
+          res.write("err has occured.");
+          res.end();
+          throw err;
         }
-      );
-
-      return;
-    }
-    // POST
-    if (reqMethod == "POST") {
-    }
-
-    // DELETE
-    if (reqMethod == "DELETE") {
-    }
+      }
+    );
     // Not found Resources
   } else {
     res.writeHead(404, { "Content-Type": "text/html" });
