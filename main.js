@@ -42,10 +42,12 @@ server.on("request", function (req, res) {
         if (reqMethod == "GET") {
           // Check query
           if (reqQueryLength === 0) {
+            // responce all data
             res.writeHead(200, { "Content-Type": "application/json" });
             res.write(data);
             res.end();
           } else if (reqQueryLength === 1) {
+            // responce search data
             const reqKey = Object.keys(reqQuery)[0];
             const searchData = JSON.parse(data).filter((item, index) => {
               if (item[reqKey] == reqQuery[reqKey]) return true;
@@ -54,6 +56,7 @@ server.on("request", function (req, res) {
             res.write(JSON.stringify(searchData));
             res.end();
           } else {
+            // invalid query
             res.writeHead(404, { "Content-Type": "text/html" });
             res.write("<h1>INVALID QUERY...</h1>");
             res.end();
@@ -63,28 +66,58 @@ server.on("request", function (req, res) {
 
         // POST
         if (reqMethod == "POST") {
+          // Get stream
           let stream = "";
           req.on("data", (chunk) => {
             stream += chunk;
           });
+          // Complete getting stream
           req.on("end", () => {
-            const addedData = [...JSON.parse(data), JSON.parse(stream)];
-            fs.writeFile(resourceFile, JSON.stringify(addedData), (err) => {
-              if (err) throw err;
-              res.writeHead(200, { "Content-Type": "text/html" });
-              res.write("<h1>OK Registed<h1>");
+            // Add data
+            if (reqQueryLength === 0) {
+              const addedData = [...JSON.parse(data), JSON.parse(stream)];
+              fs.writeFile(resourceFile, JSON.stringify(addedData), (err) => {
+                if (err) throw err;
+                res.writeHead(200, { "Content-Type": "text/html" });
+                res.write("<h1>OK Registed<h1>");
+                res.end();
+              });
+              // Update data
+            } else if (reqQueryLength === 1) {
+              const reqKey = Object.keys(reqQuery)[0];
+              const updatedData = JSON.parse(data).map((item) => {
+                if (item[reqKey] != reqQuery[reqKey]) {
+                  return item;
+                } else {
+                  return JSON.parse(stream);
+                }
+              });
+              fs.writeFile(resourceFile, JSON.stringify(updatedData), (err) => {
+                if (err) throw err;
+                res.writeHead(200, { "Content-Type": "text/html" });
+                res.write("<h1>OK Updated<h1>");
+                res.end();
+              });
+            } else {
+              // invalid query
+              res.writeHead(404, { "Content-Type": "text/html" });
+              res.write("<h1>INVALID QUERY...</h1>");
               res.end();
-            });
+            }
           });
+          return;
         }
 
         // DELETE
         if (reqMethod == "DELETE") {
+          // Get stream
           let stream = "";
           req.on("data", (chunk) => {
             stream += chunk;
           });
+          // Complete getting data
           req.on("end", () => {
+            // Delete data
             const reqKey = Object.keys(reqQuery)[0];
             const deletedData = JSON.parse(data).filter((item, index) => {
               if (item[reqKey] !== reqQuery[reqKey]) return true;
@@ -96,6 +129,7 @@ server.on("request", function (req, res) {
               res.end();
             });
           });
+          return;
         }
       } catch {
         res.writeHead(500, { "Content-Type": "text/html" });
