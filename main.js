@@ -118,16 +118,23 @@ server.on("request", function (req, res) {
           // Complete getting data
           req.on("end", () => {
             // Delete data
-            const reqKey = Object.keys(reqQuery)[0];
-            const deletedData = JSON.parse(data).filter((item, index) => {
-              if (item[reqKey] !== reqQuery[reqKey]) return true;
-            });
-            fs.writeFile(resourceFile, JSON.stringify(deletedData), (err) => {
-              if (err) throw err;
-              res.writeHead(200, { "Content-Type": "text/html" });
-              res.write("<h1>OK Deleted<h1>");
+            if (reqQueryLength === 1) {
+              const reqKey = Object.keys(reqQuery)[0];
+              const deletedData = JSON.parse(data).filter((item, index) => {
+                if (item[reqKey] !== reqQuery[reqKey]) return true;
+              });
+              fs.writeFile(resourceFile, JSON.stringify(deletedData), (err) => {
+                if (err) throw err;
+                res.writeHead(200, { "Content-Type": "text/html" });
+                res.write("<h1>OK Deleted<h1>");
+                res.end();
+              });
+            } else {
+              // invalid query
+              res.writeHead(404, { "Content-Type": "text/html" });
+              res.write("<h1>INVALID QUERY...</h1>");
               res.end();
-            });
+            }
           });
           return;
         }
