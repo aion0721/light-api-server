@@ -35,8 +35,7 @@ server.on("request", function (req, res) {
     });
     // Check Exist Resource
   } else if (config.resources.includes(reqResource)) {
-    const resourceFile =
-      __dirname + "/" + dataDir + "/" + reqResource + ".json";
+    const resourceFile = `${__dirname}/${dataDir}/${reqResource}.json`;
     fs.readFile(resourceFile, "utf8", function (err, data) {
       try {
         // GET
@@ -81,6 +80,22 @@ server.on("request", function (req, res) {
 
         // DELETE
         if (reqMethod == "DELETE") {
+          let stream = "";
+          req.on("data", (chunk) => {
+            stream += chunk;
+          });
+          req.on("end", () => {
+            const reqKey = Object.keys(reqQuery)[0];
+            const deletedData = JSON.parse(data).filter((item, index) => {
+              if (item[reqKey] !== reqQuery[reqKey]) return true;
+            });
+            fs.writeFile(resourceFile, JSON.stringify(deletedData), (err) => {
+              if (err) throw err;
+              res.writeHead(200, { "Content-Type": "text/html" });
+              res.write("<h1>OK Deleted<h1>");
+              res.end();
+            });
+          });
         }
       } catch {
         res.writeHead(500, { "Content-Type": "text/html" });
