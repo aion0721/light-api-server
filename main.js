@@ -16,16 +16,34 @@ init(dataDir, config.resources);
 
 server.on("request", function (req, res) {
   const urlParse = url.parse(req.url, true);
+  const reqResource = urlParse.pathname.replace("/", "");
   if (urlParse.pathname === "/") {
     fs.readFile(__dirname + "/static/index.html", "utf8", function (err, data) {
-      res.writeHead(200, { "Content-Type": "text/html" });
-      res.write(data);
-      res.end();
+      try {
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.write(data);
+        res.end();
+      } catch {
+        throw err;
+      }
     });
-  } else if (config.resources.includes(urlParse.replace("/", ""))) {
-    res.writeHead(200, { "Content-Type": "text/html" });
-    res.write("ok");
-    res.end();
+  } else if (config.resources.includes(reqResource)) {
+    fs.readFile(
+      __dirname + "/" + dataDir + "/" + reqResource,
+      "utf8",
+      function (err, data) {
+        try {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.write(data);
+          res.end();
+        } catch {
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.write("err has occured.");
+          res.end();
+          throw err;
+        }
+      }
+    );
   } else {
     res.writeHead(404, { "Content-Type": "text/html" });
     res.write("<h1>NOT FOUND...</h1>");
