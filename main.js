@@ -48,8 +48,9 @@ server.on("request", function (req, res) {
               res.write(data);
               res.end();
             } else if (reqQueryLength === 1) {
+              const reqKey = Object.keys(reqQuery)[0];
               const searchData = JSON.parse(data).filter((item, index) => {
-                if (item.id == reqQuery.id) return true;
+                if (item[reqKey] == reqQuery[reqKey]) return true;
               });
               res.writeHead(200, { "Content-Type": "application/json" });
               res.write(JSON.stringify(searchData));
