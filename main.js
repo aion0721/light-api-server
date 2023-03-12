@@ -86,11 +86,7 @@ server.on("request", function (req, res) {
             } else if (reqQueryLength === 1) {
               const reqKey = Object.keys(reqQuery)[0];
               const updatedData = JSON.parse(data).map((item) => {
-                if (item[reqKey] != reqQuery[reqKey]) {
-                  return item;
-                } else {
-                  return JSON.parse(stream);
-                }
+                item[reqKey] != reqQuery[reqKey] ? item : JSON.parse(stream);
               });
               fs.writeFile(resourceFile, JSON.stringify(updatedData), (err) => {
                 if (err) throw err;
@@ -121,7 +117,7 @@ server.on("request", function (req, res) {
             if (reqQueryLength === 1) {
               const reqKey = Object.keys(reqQuery)[0];
               const deletedData = JSON.parse(data).filter((item, index) => {
-                if (item[reqKey] !== reqQuery[reqKey]) return true;
+                item[reqKey] !== reqQuery[reqKey];
               });
               fs.writeFile(resourceFile, JSON.stringify(deletedData), (err) => {
                 if (err) throw err;
