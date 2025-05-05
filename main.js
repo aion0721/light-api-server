@@ -22,6 +22,18 @@ server.on("request", function (req, res) {
   const reqQuery = urlParse.query;
   const reqQueryLength = Object.keys(reqQuery).length;
 
+  // CORSヘッダーを常に追加
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+
+  // プリフライトリクエスト(OPTIONS)対応
+  if (req.method === "OPTIONS") {
+    res.writeHead(200);
+    res.end();
+    return;
+  }
+
   // Static Index
   if (urlParse.pathname === "/") {
     fs.readFile(__dirname + "/static/index.html", "utf8", function (err, data) {
