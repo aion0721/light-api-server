@@ -1,11 +1,14 @@
 {
   "name": "light-api-server",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Zero-dependency, file-backed REST API server for Node.js",
+  "main": "main.js",
   "scripts": {
     "start": "node main.js",
-    "test": "node test/indexTest.js"
+    "test": "node --test test/server.test.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "author": "",
   "license": "ISC"
